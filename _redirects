@@ -1,0 +1,6 @@
+# Cloudflare Pages — URL Redirects
+# Handles clean URL routing for MHTML pages
+# Format: [source] [destination] [status]
+
+# SPA fallback — all unmatched routes go to index.html (200 = rewrite, not redirect)
+/*    /index.html    200

@@ -1,0 +1,14 @@
+# Cloudflare Pages — Response Headers
+# Configures correct MIME types and security for MHTML assets
+
+# Serve MHTML files as multipart/related so browsers render them inline
+/*.mhtml
+  Content-Type: multipart/related; type="text/html"; charset=UTF-8
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+
+# Security headers for all pages
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin

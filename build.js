@@ -16,16 +16,17 @@ const DIST      = path.join(__dirname, 'dist');
 const R = ROUTE_MAP;
 
 // ── Route table ──────────────────────────────────────────────────────────────
-// outFile maps each hash URL to a dist/ path that Cloudflare can serve.
-// Hash URL /abc123 → dist/abc123/index.html → served at domain.com/abc123/
+// Every page (including home) is stored at its 96-char hash path.
+// dist/index.html is a lightweight JS redirect → home hash.
 const ROUTES = [
-  { urlPath: R['/'],                  file: 'Home.mhtml',                          outFile: 'index.html'                                             },
-  { urlPath: R['/author'],            file: 'Author.mhtml',                        outFile: R['/author'].slice(1)            + '/index.html'         },
-  { urlPath: R['/review'],            file: 'Review.mhtml',                        outFile: R['/review'].slice(1)            + '/index.html'         },
-  { urlPath: R['/author/submission'], file: 'Start New Submission (Author).mhtml', outFile: R['/author/submission'].slice(1)  + '/index.html'         },
-  { urlPath: R['/author/email'],      file: 'Recent Email (Author).mhtml',         outFile: R['/author/email'].slice(1)      + '/index.html'         },
-  { urlPath: R['/author/editing'],    file: 'English Editing (Author).mhtml',      outFile: R['/author/editing'].slice(1)    + '/index.html'         },
+  { urlPath: R['/'],                  file: 'Home.mhtml',                          outFile: R['/'].slice(1)                  + '/index.html' },
+  { urlPath: R['/author'],            file: 'Author.mhtml',                        outFile: R['/author'].slice(1)            + '/index.html' },
+  { urlPath: R['/review'],            file: 'Review.mhtml',                        outFile: R['/review'].slice(1)            + '/index.html' },
+  { urlPath: R['/author/submission'], file: 'Start New Submission (Author).mhtml', outFile: R['/author/submission'].slice(1)  + '/index.html' },
+  { urlPath: R['/author/email'],      file: 'Recent Email (Author).mhtml',         outFile: R['/author/email'].slice(1)      + '/index.html' },
+  { urlPath: R['/author/editing'],    file: 'English Editing (Author).mhtml',      outFile: R['/author/editing'].slice(1)    + '/index.html' },
 ];
+
 
 // ── PDF assets ────────────────────────────────────────────────────────────────
 const PDFS = [
@@ -192,6 +193,22 @@ const headersContent = PDFS.map(pdf => [
 
 fs.writeFileSync(path.join(DIST, '_headers'), headersContent + '\n');
 console.log('\n  📋  dist/_headers written');
+
+// _redirects: bare "/" → home hash (Cloudflare Pages/Workers format)
+const homeHash = R['/'];
+const redirects = `/ ${homeHash} 302\n`;
+fs.writeFileSync(path.join(DIST, '_redirects'), redirects);
+console.log('  📋  dist/_redirects written');
+
+// dist/index.html: instant JS fallback redirect (for Workers static assets)
+const redirectHtml = `<!DOCTYPE html><html><head>
+<meta charset="utf-8">
+<meta http-equiv="refresh" content="0;url=${homeHash}">
+<script>location.replace('${homeHash}');</script>
+</head><body></body></html>`;
+fs.writeFileSync(path.join(DIST, 'index.html'), redirectHtml);
+console.log('  📋  dist/index.html written (redirect → home hash)');
+
 
 if (!ok) { console.error('\n❌  Build completed with errors.\n'); process.exit(1); }
 console.log('\n✅  Build complete → dist/\n');

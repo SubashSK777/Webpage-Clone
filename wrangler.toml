@@ -1,9 +1,13 @@
-name = "webpage-clone"
-main = "src/worker.js"
-compatibility_date = "2024-09-23"
+# Cloudflare Pages — build config
+# Dashboard settings:
+#   Framework preset : None
+#   Build command    : npm run build
+#   Build output dir : dist
+#   Node.js version  : 18 (set in Environment Variables: NODE_VERSION = 18)
 
-# Serve all static files (MHTML, HTML, JS) from the project root
-[assets]
-binding = "ASSETS"
-directory = "./public"
-not_found_handling = "single-page-application"
+[build]
+command = "npm run build"
+destination = "dist"
+
+[build.environment]
+NODE_VERSION = "18"
